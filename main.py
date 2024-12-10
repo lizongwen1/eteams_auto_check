@@ -1,39 +1,41 @@
 import requests
 import logging
+import argparse
 
-# 以下内容需要根据自己的实际情况进行修改
+# Constants
 USERNAME = "xxxxx"
 PASSWORD = "xxxx"
 CHECK_ADDRESS = "xx市xxxx"
 LATITUDE = "xx.xxxxxx"
 LONGITUDE = "xxx.xxxxxx"
-IYUUAPI = "https://iyuu.cn/xxxxx.send"  # 爱语飞飞微信推送
+IYUUAPI = "xxxxtokenxxxx"  # 爱语飞飞微信推送
 
 LOGIN_URL = "https://passport.eteams.cn/papi/passport/login/appLogin"  # 登录页面
 CHECK_URL = "https://weapp.eteams.cn/api/app/attend/web/sign/getAttendStatus"  # 检测打卡
 ATTEND_URL = "https://weapp.eteams.cn/api/app/attend/web/sign/sign"  # 打卡接口
-SIGNATURE_URL = "https://weapp.eteams.cn/papi/app/eb/open/wxcard" # 获取签名
+SIGNATURE_URL = "https://weapp.eteams.cn/papi/app/eb/open/wxcard"  # 获取签名
 
+# Variables
+jsessionid = ""
+tenantkey = ""
+uid = ""
+eteamsid = ""
+message = ""
+timecard_status = ""
+signature = ""
 
-# 变量
-JSESSIONID = ""
-TENANTKEY = ""
-UID = ""
-ETEAMSID = ""
-MESSAGE = ""
-TIMECARD_STATUS = ""
-SIGNATURE=""
+def configure_logging():
+    """Configure logging settings."""
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
-# 日志配置
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+configure_logging()
 
-
-# 微信推送
 def push_wechat():
-    if not MESSAGE:
+    """Push notification to WeChat."""
+    if not message:
         return
     params = {
-        "text": MESSAGE,
+        "text": message,
     }
     try:
         response = requests.get(IYUUAPI, params=params)
@@ -42,10 +44,9 @@ def push_wechat():
     except requests.RequestException as e:
         logging.error(f"微信推送失败: {e}")
 
-
-# 登录
 def login():
-    global JSESSIONID, TENANTKEY, UID, ETEAMSID
+    """Login to the system."""
+    global jsessionid, tenantkey, uid, eteamsid
     headers = {
         "Content-Type": "application/json;charset=UTF-8",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) weapp/4.3.9/public//1.0/",
@@ -63,31 +64,27 @@ def login():
         response = requests.post(LOGIN_URL, headers=headers, params=queryparam)
         response.raise_for_status()
         result = response.json()
-        JSESSIONID, TENANTKEY, UID, ETEAMSID = parse_login_result(result)
-        if all([JSESSIONID, TENANTKEY, UID, ETEAMSID]):
+        jsessionid, tenantkey, uid, eteamsid = parse_login_result(result)
+        if all([jsessionid, tenantkey, uid, eteamsid]):
             logging.info("登录成功！")
         else:
             logging.error("登录失败！")
-
-
     except requests.RequestException as e:
         logging.error(f"登录请求失败: {e}")
 
-
-# 解析登录结果
 def parse_login_result(result):
+    """Parse login result."""
     jsessionid = result.get("jsessionid", "")
     tenantkey = result.get("tenantkey", "")
     uid = result.get("uid", "")
     eteamsid = result.get("ETEAMSID", "")
     return jsessionid, tenantkey, uid, eteamsid
 
-
-# 检测打卡类型
 def check_attendance():
-    global TIMECARD_STATUS
+    """Check attendance status."""
+    global timecard_status
     headers = {
-        "Cookie": f"ETEAMSID={ETEAMSID}; JSESSIONID={JSESSIONID}",
+        "Cookie": f"ETEAMSID={eteamsid}; JSESSIONID={jsessionid}",
         "Content-Type": "application/json;charset=UTF-8",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) weapp/4.3.9/public//1.0/",
     }
@@ -95,17 +92,16 @@ def check_attendance():
         response = requests.get(CHECK_URL, headers=headers)
         response.raise_for_status()
         result = response.json()
-        TIMECARD_STATUS = result.get("data", {}).get("signStatus", "")
-        logging.info(f"打卡类型检测结果: {TIMECARD_STATUS}")
+        timecard_status = result.get("data", {}).get("signStatus", "")
+        logging.info(f"打卡类型检测结果: {timecard_status}")
     except requests.RequestException as e:
         logging.error(f"检测打卡类型失败: {e}")
 
-
-# 打卡
 def attendance():
-    global MESSAGE
+    """Perform attendance check-in or check-out."""
+    global message
     headers = {
-        "Cookie": f"ETEAMSID={ETEAMSID}; JSESSIONID={JSESSIONID}",
+        "Cookie": f"ETEAMSID={eteamsid}; JSESSIONID={jsessionid}",
         "Content-Type": "application/json;charset=UTF-8",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) weapp/4.3.9/public//1.0/",
     }
@@ -113,9 +109,9 @@ def attendance():
         "checkAddress": CHECK_ADDRESS,
         "latitude": LATITUDE,
         "longitude": LONGITUDE,
-        "type": TIMECARD_STATUS,
-        "sign": SIGNATURE,
-        "userId": UID,
+        "type": timecard_status,
+        "sign": signature,
+        "userId": uid,
     }
     params = {
         "device": "Mobile",
@@ -132,19 +128,19 @@ def attendance():
         result = response.json()
         status = result.get("status", False)
         if status:
-            MESSAGE = "签到成功！" if TIMECARD_STATUS == "CHECKIN" else "签退成功！"
-            logging.info(MESSAGE)
+            message = "签到成功！" if timecard_status == "CHECKIN" else "签退成功！"
+            logging.info(message)
         else:
-            MESSAGE = "签到异常！"
-            logging.error(MESSAGE)
+            message = "签到异常！"
+            logging.error(message)
     except requests.RequestException as e:
         logging.error(f"打卡请求失败: {e}")
 
-# 获取签名
 def get_signature():
-    global SIGNATURE
+    """Get signature for attendance."""
+    global signature
     headers = {
-        "Cookie": f"ETEAMSID={ETEAMSID}",
+        "Cookie": f"ETEAMSID={eteamsid}",
         "Content-Type": "application/json;charset=UTF-8",
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) weapp/4.3.9/public//1.0/",
     }
@@ -158,19 +154,36 @@ def get_signature():
         response = requests.get(SIGNATURE_URL, headers=headers, params=params)
         response.raise_for_status()
         result = response.json()
-        SIGNATURE = result.get("data", {}).get("signature", "")
+        signature = result.get("data", {}).get("signature", "")
         logging.info("获得签名成功！")
     except requests.RequestException as e:
         logging.error(f"获取签名失败: {e}")
 
-
 def main():
+    """Main function to execute the attendance process."""
+    parser = argparse.ArgumentParser(description="Eteams Auto Check-in")
+    parser.add_argument("--username", required=True, help="Username for login")
+    parser.add_argument("--password", required=True, help="Password for login")
+    parser.add_argument("--check_address", required=True, help="Check-in address")
+    parser.add_argument("--latitude", required=True, help="Latitude for check-in location")
+    parser.add_argument("--longitude", required=True, help="Longitude for check-in location")
+    parser.add_argument("--iyuuapi", required=True, help="IYUUAPI for WeChat push notifications")
+    
+    args = parser.parse_args()
+    
+    global USERNAME, PASSWORD, CHECK_ADDRESS, LATITUDE, LONGITUDE, IYUUAPI
+    USERNAME = args.username
+    PASSWORD = args.password
+    CHECK_ADDRESS = args.check_address
+    LATITUDE = args.latitude
+    LONGITUDE = args.longitude
+    IYUUAPI =  f"https://iyuu.cn/{args.iyuuapi}.send"
+    
     login()
     get_signature()
     check_attendance()
     attendance()
     push_wechat()
-
 
 if __name__ == "__main__":
     main()

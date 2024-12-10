@@ -34,8 +34,8 @@ python main.py --username <你的用户名> --password <你的密码> --check_ad
 
 ## 使用GitHub Actions定时运行（推荐）
 
-### 1. 配置GitHub Secrets
-在GitHub仓库中，配置以下Secrets：
+### 1.Fork本仓库，配置GitHub Secrets
+在Fork的仓库中，配置以下Secrets：
 - `USERNAME`: 你的用户名
 - `PASSWORD`: 你的密码
 - `CHECK_ADDRESS`: 打卡地址

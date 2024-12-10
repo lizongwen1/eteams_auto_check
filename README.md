@@ -49,5 +49,12 @@ python main.py --username <你的用户名> --password <你的密码> --check_ad
 ### 3. 手动触发工作流
 你也可以在GitHub Actions页面手动触发工作流。
 
+
+## Acknowledgements
+
+This project is built upon the work of others:
+- [Emo403/eteams_auto](https://github.com/Emo403/eteams_auto)
+
+
 ## 许可证
 该项目使用MIT许可证，详情请参见LICENSE文件。

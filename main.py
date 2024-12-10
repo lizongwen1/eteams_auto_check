@@ -7,12 +7,13 @@ PASSWORD = "xxxx"
 CHECK_ADDRESS = "xx市xxxx"
 LATITUDE = "xx.xxxxxx"
 LONGITUDE = "xxx.xxxxxx"
+IYUUAPI = "https://iyuu.cn/xxxxx.send"  # 爱语飞飞微信推送
 
 LOGIN_URL = "https://passport.eteams.cn/papi/passport/login/appLogin"  # 登录页面
 CHECK_URL = "https://weapp.eteams.cn/api/app/attend/web/sign/getAttendStatus"  # 检测打卡
 ATTEND_URL = "https://weapp.eteams.cn/api/app/attend/web/sign/sign"  # 打卡接口
 SIGNATURE_URL = "https://weapp.eteams.cn/papi/app/eb/open/wxcard" # 获取签名
-IYUUAPI = "https://iyuu.cn/IYUU56813T6e6f966ad0f13c70141c4b111b072215c84a9f14.send"  # 微信推送
+
 
 # 变量
 JSESSIONID = ""

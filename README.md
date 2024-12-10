@@ -1,5 +1,5 @@
 # eteams_auto_check
-泛微eteams自动打卡
+泛微eteams自动打卡签到/签退，自定义位置，微信推送打卡结果
 
 ## 项目简介
 该项目用于泛微eteams打卡，支持自定义位置经纬度，支持通过GitHub Actions定时运行，并通过爱语飞飞微信推送打卡结果。

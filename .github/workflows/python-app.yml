@@ -26,4 +26,4 @@ jobs:
         python-version: "3.12"
 
     - name: run python script
-      run: python main.py
+      run: python main.py --username ${{ secrets.USERNAME }} --password ${{ secrets.PASSWORD }} --check_address ${{ secrets.CHECK_ADDRESS }} --latitude ${{ secrets.LATITUDE }} --longitude ${{ secrets.LONGITUDE }} --iyuuapi ${{ secrets.IYUUAPI }}

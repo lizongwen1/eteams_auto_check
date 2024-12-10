@@ -1,5 +1,6 @@
 import requests
 import logging
+import argparse
 
 # 以下内容需要根据自己的实际情况进行修改
 USERNAME = "xxxxx"
@@ -7,7 +8,7 @@ PASSWORD = "xxxx"
 CHECK_ADDRESS = "xx市xxxx"
 LATITUDE = "xx.xxxxxx"
 LONGITUDE = "xxx.xxxxxx"
-IYUUAPI = "https://iyuu.cn/xxxxx.send"  # 爱语飞飞微信推送
+IYUUAPI = "xxxxtokenxxxx"  # 爱语飞飞微信推送
 
 LOGIN_URL = "https://passport.eteams.cn/papi/passport/login/appLogin"  # 登录页面
 CHECK_URL = "https://weapp.eteams.cn/api/app/attend/web/sign/getAttendStatus"  # 检测打卡
@@ -165,6 +166,24 @@ def get_signature():
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Eteams Auto Check-in")
+    parser.add_argument("--username", required=True, help="Username for login")
+    parser.add_argument("--password", required=True, help="Password for login")
+    parser.add_argument("--check_address", required=True, help="Check-in address")
+    parser.add_argument("--latitude", required=True, help="Latitude for check-in location")
+    parser.add_argument("--longitude", required=True, help="Longitude for check-in location")
+    parser.add_argument("--iyuuapi", required=True, help="IYUUAPI for WeChat push notifications")
+    
+    args = parser.parse_args()
+    
+    global USERNAME, PASSWORD, CHECK_ADDRESS, LATITUDE, LONGITUDE, IYUUAPI
+    USERNAME = args.username
+    PASSWORD = args.password
+    CHECK_ADDRESS = args.check_address
+    LATITUDE = args.latitude
+    LONGITUDE = args.longitude
+    IYUUAPI =  f"https://iyuu.cn/{args.iyuuapi}.send"
+    
     login()
     get_signature()
     check_attendance()

@@ -8,7 +8,10 @@ PASSWORD = "xxxx"
 CHECK_ADDRESS = "xx市xxxx"
 LATITUDE = "xx.xxxxxx"
 LONGITUDE = "xxx.xxxxxx"
-IYUUAPI = "xxxxtokenxxxx"  # 爱语飞飞微信推送
+IYUU_TOKEN = "xxxxtokenxxxx"  # 爱语飞飞微信推送
+TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN"
+TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"
+
 
 LOGIN_URL = "https://passport.eteams.cn/papi/passport/login/appLogin"  # 登录页面
 CHECK_URL = "https://weapp.eteams.cn/api/app/attend/web/sign/getAttendStatus"  # 检测打卡
@@ -34,6 +37,7 @@ def push_wechat():
     """Push notification to WeChat."""
     if not message:
         return
+    IYUUAPI =  f"https://iyuu.cn/{IYUU_TOKEN}.send"
     params = {
         "text": message,
     }
@@ -43,6 +47,24 @@ def push_wechat():
         logging.info("微信推送成功！")
     except requests.RequestException as e:
         logging.error(f"微信推送失败: {e}")
+
+def push_telegram():
+    """Push notification to Telegram."""
+    
+    if not message:
+        return
+    TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"  
+    params = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message,
+    }
+    
+    try:
+        response = requests.get(TELEGRAM_API, params=params)
+        response.raise_for_status()
+        logging.info("Telegram推送成功！")
+    except requests.RequestException as e:
+        logging.error(f"Telegram推送失败: {e}")
 
 def login():
     """Login to the system."""
@@ -128,10 +150,10 @@ def attendance():
         result = response.json()
         status = result.get("status", False)
         if status:
-            message = "签到成功！" if timecard_status == "CHECKIN" else "签退成功！"
+            message = "签到成功！✅" if timecard_status == "CHECKIN" else "签退成功！✅"
             logging.info(message)
         else:
-            message = "签到异常！"
+            message = "签到异常！❎"
             logging.error(message)
     except requests.RequestException as e:
         logging.error(f"打卡请求失败: {e}")
@@ -167,23 +189,29 @@ def main():
     parser.add_argument("--check_address", required=True, help="Check-in address")
     parser.add_argument("--latitude", required=True, help="Latitude for check-in location")
     parser.add_argument("--longitude", required=True, help="Longitude for check-in location")
-    parser.add_argument("--iyuuapi", required=True, help="IYUUAPI for WeChat push notifications")
+    parser.add_argument("--iyuu_token", required=True, help="iyuu_token for WeChat push notifications")
+    parser.add_argument("--telegram_token", required=True, help="Telegram bot token")
+    parser.add_argument("--telegram_chat_id",, required=True, help="Telegram chat ID")
     
     args = parser.parse_args()
     
-    global USERNAME, PASSWORD, CHECK_ADDRESS, LATITUDE, LONGITUDE, IYUUAPI
+    global USERNAME, PASSWORD, CHECK_ADDRESS, LATITUDE, LONGITUDE, IYUU_TOKEN, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
     USERNAME = args.username
     PASSWORD = args.password
     CHECK_ADDRESS = args.check_address
     LATITUDE = args.latitude
     LONGITUDE = args.longitude
-    IYUUAPI =  f"https://iyuu.cn/{args.iyuuapi}.send"
+    IYUU_TOKEN = args.iyuu_token
+    TELEGRAM_BOT_TOKEN = args.telegram_token
+    TELEGRAM_CHAT_ID = args.telegram_chat_id
+    
     
     login()
     get_signature()
     check_attendance()
     attendance()
     push_wechat()
+    push_telegram()
 
 if __name__ == "__main__":
     main()

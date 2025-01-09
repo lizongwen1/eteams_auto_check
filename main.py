@@ -191,7 +191,7 @@ def main():
     parser.add_argument("--longitude", required=True, help="Longitude for check-in location")
     parser.add_argument("--iyuu_token", required=True, help="iyuu_token for WeChat push notifications")
     parser.add_argument("--telegram_token", required=True, help="Telegram bot token")
-    parser.add_argument("--telegram_chat_id",, required=True, help="Telegram chat ID")
+    parser.add_argument("--telegram_chat_id", required=True, help="Telegram chat ID")
     
     args = parser.parse_args()
     
